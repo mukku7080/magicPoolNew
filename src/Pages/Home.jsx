@@ -1,16 +1,30 @@
 import React, { useEffect } from 'react'
+import { Link } from 'react-router-dom'
 
 const Home = () => {
 
 
     useEffect(() => {
-        setTimeout(() => {
-            if (window.initPageScripts) {
-                window.initPageScripts(); // ✅ Now DOM is fully mounted
-            } else {
+        let timeoutId;
+
+        // Prevent double execution in StrictMode
+        const initScripts = () => {
+            if (window.initPageScripts && !window.scriptsInitialized) {
+                window.initPageScripts();
+                window.scriptsInitialized = true;
+            } else if (!window.initPageScripts) {
                 console.warn("initPageScripts not found");
             }
-        }, 300); // Slight delay helps ensure full render
+        };
+
+        timeoutId = setTimeout(initScripts, 300);
+
+        // Cleanup function
+        return () => {
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+            }
+        };
     }, []);
     return (
         <>
@@ -269,15 +283,14 @@ const Home = () => {
                                         <i className="flaticon-bitcoin" />
                                     </div>
                                     <h5 className="trading-block_two-title">
-                                        <a href="service-detail.html">Auto Pool Income </a>
+                                        <Link to="/auto-pool-income">Auto Pool Income </Link>
                                     </h5>
                                     <div className="trading-block_two-text">
-                                        Traders with professional accounts gain access to a wide range
-                                        of benefits, including enhanced trading platforms
+                                        Automatic profit distribution system that generates passive income through our advanced trading algorithms and pool management.
                                     </div>
-                                    <a href="service-detail.html" className="trading-block_two-more">
+                                    <Link to="/auto-pool-income" className="trading-block_two-more">
                                         read more <i className="fa-solid fa-angles-right fa-fw" />
-                                    </a>
+                                    </Link>
                                 </div>
                             </div>
                             {/* Trading Block Two */}
@@ -287,15 +300,14 @@ const Home = () => {
                                         <i className="flaticon-currencies" />
                                     </div>
                                     <h5 className="trading-block_two-title">
-                                        <a href="service-detail.html">Reward Income</a>
+                                        <Link to="/reward-income">Reward Income</Link>
                                     </h5>
                                     <div className="trading-block_two-text">
-                                        Traders with professional accounts gain access to a wide range
-                                        of benefits, including enhanced trading platforms
+                                        Earn additional income through achievement-based rewards, milestones, and loyalty programs within our ecosystem.
                                     </div>
-                                    <a href="service-detail.html" className="trading-block_two-more">
+                                    <Link to="/reward-income" className="trading-block_two-more">
                                         read more <i className="fa-solid fa-angles-right fa-fw" />
-                                    </a>
+                                    </Link>
                                 </div>
                             </div>
                             {/* Trading Block Two */}
@@ -305,15 +317,14 @@ const Home = () => {
                                         <i className="flaticon-save-money" />
                                     </div>
                                     <h5 className="trading-block_two-title">
-                                        <a href="service-detail.html">Monthly ROI</a>
+                                        <Link to="/monthly-roi">Monthly ROI</Link>
                                     </h5>
                                     <div className="trading-block_two-text">
-                                        Traders with professional accounts gain access to a wide range
-                                        of benefits, including enhanced trading platforms
+                                        Get consistent monthly returns on your investment with guaranteed ROI through our professional fund management.
                                     </div>
-                                    <a href="service-detail.html" className="trading-block_two-more">
+                                    <Link to="/monthly-roi" className="trading-block_two-more">
                                         read more <i className="fa-solid fa-angles-right fa-fw" />
-                                    </a>
+                                    </Link>
                                 </div>
                             </div>
                             {/* Trading Block Two */}
@@ -323,15 +334,14 @@ const Home = () => {
                                         <i className="flaticon-save-money" />
                                     </div>
                                     <h5 className="trading-block_two-title">
-                                        <a href="service-detail.html">Magic Pool</a>
+                                        <Link to="/magic-pool">Magic Pool</Link>
                                     </h5>
                                     <div className="trading-block_two-text">
-                                        Traders with professional accounts gain access to a wide range
-                                        of benefits, including enhanced trading platforms
+                                        Our flagship AI-powered investment program that combines advanced trading with community-driven growth for maximum returns.
                                     </div>
-                                    <a href="service-detail.html" className="trading-block_two-more">
+                                    <Link to="/magic-pool" className="trading-block_two-more">
                                         read more <i className="fa-solid fa-angles-right fa-fw" />
-                                    </a>
+                                    </Link>
                                 </div>
                             </div>
                             {/* Trading Block Two */}
@@ -341,15 +351,14 @@ const Home = () => {
                                         <i className="flaticon-save-money" />
                                     </div>
                                     <h5 className="trading-block_two-title">
-                                        <a href="service-detail.html">Referral Income</a>
+                                        <Link to="/referral-income">Referral Income</Link>
                                     </h5>
                                     <div className="trading-block_two-text">
-                                        Traders with professional accounts gain access to a wide range
-                                        of benefits, including enhanced trading platforms
+                                        Build your network and earn substantial commissions through our multi-level referral system with instant payouts.
                                     </div>
-                                    <a href="service-detail.html" className="trading-block_two-more">
+                                    <Link to="/referral-income" className="trading-block_two-more">
                                         read more <i className="fa-solid fa-angles-right fa-fw" />
-                                    </a>
+                                    </Link>
                                 </div>
                             </div>
 

@@ -49,6 +49,7 @@ import {
     FiStar,
 } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '../../../Context';
 
 const RewardIncome = () => {
     const navigate = useNavigate();
@@ -56,6 +57,8 @@ const RewardIncome = () => {
     const [selectedPeriod, setSelectedPeriod] = useState('all');
     const [refreshing, setRefreshing] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const {profile}=useUser();
+    const income =profile?.USER;
 
     // Mock data for reward income (replace with actual API calls)
     const [rewardIncomeHistory, setRewardIncomeHistory] = useState([
@@ -95,9 +98,9 @@ const RewardIncome = () => {
     ]);
 
     const [rewardIncomeStats, setRewardIncomeStats] = useState({
-        totalIncome: 425.00,
+        totalIncome: income?.total_claim_reward,
         todayIncome: 0.00,
-        thisMonthIncome: 425.00,
+        thisMonthIncome: income?.total_claim_reward,
         totalRewards: 3,
         completedMilestones: 3
     });
@@ -244,81 +247,26 @@ const RewardIncome = () => {
                 </Flex>
 
                 {/* Stats Cards */}
-                <SimpleGrid columns={{ base: 1, md: 3, lg: 5 }} spacing={6} mb={8}>
-                    <Card bg={cardBg} borderColor={borderColor} shadow="md">
-                        <CardBody>
-                            <Stat>
-                                <StatLabel color={mutedColor}>Total Income</StatLabel>
-                                <StatNumber color={textColor} fontSize="2xl">
-                                    {formatCurrency(rewardIncomeStats.totalIncome)}
-                                </StatNumber>
-                                <StatHelpText>
-                                    <StatArrow type="increase" />
-                                    All time earnings
-                                </StatHelpText>
-                            </Stat>
-                        </CardBody>
-                    </Card>
+                <SimpleGrid columns={{ base: 1, md: 1 }} spacing={6} mb={8}>
+                   
+
+                    
 
                     <Card bg={cardBg} borderColor={borderColor} shadow="md">
                         <CardBody>
                             <Stat>
-                                <StatLabel color={mutedColor}>Today's Income</StatLabel>
-                                <StatNumber color="green.500" fontSize="2xl">
-                                    {formatCurrency(rewardIncomeStats.todayIncome)}
-                                </StatNumber>
-                                <StatHelpText>
-                                    <StatArrow type="increase" />
-                                    Today's earnings
-                                </StatHelpText>
-                            </Stat>
-                        </CardBody>
-                    </Card>
-
-                    <Card bg={cardBg} borderColor={borderColor} shadow="md">
-                        <CardBody>
-                            <Stat>
-                                <StatLabel color={mutedColor}>This Month</StatLabel>
+                                <StatLabel color={mutedColor}>Reward Income</StatLabel>
                                 <StatNumber color="blue.500" fontSize="2xl">
                                     {formatCurrency(rewardIncomeStats.thisMonthIncome)}
                                 </StatNumber>
-                                <StatHelpText>
-                                    <StatArrow type="increase" />
-                                    Monthly earnings
-                                </StatHelpText>
+                              
                             </Stat>
                         </CardBody>
                     </Card>
 
-                    <Card bg={cardBg} borderColor={borderColor} shadow="md">
-                        <CardBody>
-                            <Stat>
-                                <StatLabel color={mutedColor}>Total Rewards</StatLabel>
-                                <StatNumber color="purple.500" fontSize="2xl">
-                                    {rewardIncomeStats.totalRewards}
-                                </StatNumber>
-                                <StatHelpText>
-                                    <StatArrow type="increase" />
-                                    Rewards earned
-                                </StatHelpText>
-                            </Stat>
-                        </CardBody>
-                    </Card>
+                  
 
-                    <Card bg={cardBg} borderColor={borderColor} shadow="md">
-                        <CardBody>
-                            <Stat>
-                                <StatLabel color={mutedColor}>Milestones</StatLabel>
-                                <StatNumber color="orange.500" fontSize="2xl">
-                                    {rewardIncomeStats.completedMilestones}
-                                </StatNumber>
-                                <StatHelpText>
-                                    <StatArrow type="increase" />
-                                    Completed
-                                </StatHelpText>
-                            </Stat>
-                        </CardBody>
-                    </Card>
+                  
                 </SimpleGrid>
 
                 {/* History Table */}
@@ -354,13 +302,12 @@ const RewardIncome = () => {
                                             <Th>User</Th>
                                             <Th>Amount</Th>
                                             <Th>Reward Type</Th>
-                                            <Th>Category</Th>
-                                            <Th>Milestone</Th>
+                                            <Th>Package</Th>
                                             <Th>Status</Th>
                                             <Th>DateTime</Th>
                                         </Tr>
                                     </Thead>
-                                    <Tbody>
+                                    {/* <Tbody>
                                         {filteredHistory.map((item, index) => (
                                             <Tr key={index}>
                                                 <Td>
@@ -427,7 +374,7 @@ const RewardIncome = () => {
                                                 </Td>
                                             </Tr>
                                         ))}
-                                    </Tbody>
+                                    </Tbody> */}
                                 </Table>
                             </TableContainer>
                         )}

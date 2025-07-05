@@ -81,7 +81,7 @@ const PlatinumIncome = () => {
     ]);
 
     const [platinumIncomeStats, setPlatinumIncomeStats] = useState({
-        totalIncome: 1250.00,
+        totalIncome: 0.00,
         todayIncome: 0.00,
         thisMonthIncome: 1250.00,
         totalAchievements: 2
@@ -216,7 +216,7 @@ const PlatinumIncome = () => {
                 </Flex>
 
                 {/* Stats Cards */}
-                <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={6} mb={8}>
+                <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6} mb={8}>
                     <Card bg={cardBg} borderColor={borderColor} shadow="md">
                         <CardBody>
                             <Stat>
@@ -224,10 +224,7 @@ const PlatinumIncome = () => {
                                 <StatNumber color={textColor} fontSize="2xl">
                                     {formatCurrency(platinumIncomeStats.totalIncome)}
                                 </StatNumber>
-                                <StatHelpText>
-                                    <StatArrow type="increase" />
-                                    All time earnings
-                                </StatHelpText>
+                            
                             </Stat>
                         </CardBody>
                     </Card>
@@ -239,43 +236,12 @@ const PlatinumIncome = () => {
                                 <StatNumber color="green.500" fontSize="2xl">
                                     {formatCurrency(platinumIncomeStats.todayIncome)}
                                 </StatNumber>
-                                <StatHelpText>
-                                    <StatArrow type="increase" />
-                                    Today's earnings
-                                </StatHelpText>
+                              
                             </Stat>
                         </CardBody>
                     </Card>
 
-                    <Card bg={cardBg} borderColor={borderColor} shadow="md">
-                        <CardBody>
-                            <Stat>
-                                <StatLabel color={mutedColor}>This Month</StatLabel>
-                                <StatNumber color="blue.500" fontSize="2xl">
-                                    {formatCurrency(platinumIncomeStats.thisMonthIncome)}
-                                </StatNumber>
-                                <StatHelpText>
-                                    <StatArrow type="increase" />
-                                    Monthly earnings
-                                </StatHelpText>
-                            </Stat>
-                        </CardBody>
-                    </Card>
-
-                    <Card bg={cardBg} borderColor={borderColor} shadow="md">
-                        <CardBody>
-                            <Stat>
-                                <StatLabel color={mutedColor}>Achievements</StatLabel>
-                                <StatNumber color="purple.500" fontSize="2xl">
-                                    {platinumIncomeStats.totalAchievements}
-                                </StatNumber>
-                                <StatHelpText>
-                                    <StatArrow type="increase" />
-                                    Total rewards
-                                </StatHelpText>
-                            </Stat>
-                        </CardBody>
-                    </Card>
+                   
                 </SimpleGrid>
 
                 {/* History Table */}
@@ -308,15 +274,15 @@ const PlatinumIncome = () => {
                                 <Table variant="simple" size="sm">
                                     <Thead>
                                         <Tr>
-                                            <Th>User</Th>
                                             <Th>Amount</Th>
-                                            <Th>Tier</Th>
-                                            <Th>Achievement</Th>
-                                            <Th>Bonus Type</Th>
+                                            <Th>Bonus%</Th>
+                                            <Th>Today's Credit</Th>
+                                            <Th>Total Credit</Th>
+                                            <Th>Status</Th>
                                             <Th>DateTime</Th>
                                         </Tr>
                                     </Thead>
-                                    <Tbody>
+                                    {/* <Tbody>
                                         {filteredHistory.map((item, index) => (
                                             <Tr key={index}>
                                                 <Td>
@@ -375,7 +341,7 @@ const PlatinumIncome = () => {
                                                 </Td>
                                             </Tr>
                                         ))}
-                                    </Tbody>
+                                    </Tbody> */}
                                 </Table>
                             </TableContainer>
                         )}

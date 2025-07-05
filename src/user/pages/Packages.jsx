@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Box,
     Grid,
@@ -64,17 +64,31 @@ import {
 } from 'react-icons/fi';
 import { AiOutlineRocket, AiOutlineCrown, AiOutlineStar } from 'react-icons/ai';
 import { useAccount } from '../../Context';
+import { toast, ToastContainer } from 'react-toastify';
+import { useIncome } from '../../Context/IncomeContext';
 
 const Packages = () => {
+    const {
+        monthlyROIHistory,
+        monthlyROIStats,
+        isLoading,
+        error,
+        getMonthlyROIHistory,
+        clearError,
+    } = useIncome();
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [selectedPackage, setSelectedPackage] = useState(null);
     const [investmentAmount, setInvestmentAmount] = useState('');
-    const toast = useToast();
+    // const toast = useToast();
 
     const cardBg = useColorModeValue('white', 'gray.800');
     const borderColor = useColorModeValue('gray.200', 'gray.700');
     const textColor = useColorModeValue('gray.600', 'gray.400');
     const { handleJoinPackage } = useAccount();
+    useEffect(() => {
+        getMonthlyROIHistory(); // Fetch data when the component mounts
+    }, [])
+    console.log(monthlyROIHistory.filter(item => item.stake_amount == 10)?.[0]?.status);
 
     // Available packages
     const availablePackages = [
@@ -84,11 +98,12 @@ const Packages = () => {
             icon: AiOutlineRocket,
             imgsrc: '/assets/images/pool1.png',
             color: 'blue',
+            btnType: monthlyROIHistory.filter(item => item.stake_amount == 10)?.[0]?.status === 'success' ? 'Allready Joined' : 'Join Now',
             minInvestment: 10,
             // maxInvestment: 49,
             dailyReturn: 3,
-            duration: 30,
-            referelIncome: ['10', '15', '30'],
+            duration: new Date(monthlyROIHistory.filter(item => item.stake_amount == 10)?.[0]?.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }),
+            referelIncome: ['10', '15', '20'],
             totalReturn: 10,
             features: [
                 'Daily returns',
@@ -106,11 +121,13 @@ const Packages = () => {
             imgsrc: '/assets/images/pool2.png',
 
             color: 'yellow',
+            btnType: monthlyROIHistory.filter(item => item.stake_amount == 50)?.[0]?.status === 'success' ? 'Allready Joined' : 'Join Now',
+
             minInvestment: 50,
             // maxInvestment: 99,
             dailyReturn: 4,
-            referelIncome: [10, 15, 30],
-            duration: 30,
+            referelIncome: [10, 15, 20],
+            duration: new Date(monthlyROIHistory.filter(item => item.stake_amount == 50)?.[0]?.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }),
             totalReturn: 12,
             features: [
                 'Higher daily returns',
@@ -129,10 +146,12 @@ const Packages = () => {
             imgsrc: '/assets/images/pool3.png',
             color: 'cyan',
             minInvestment: 100,
+            btnType: monthlyROIHistory.filter(item => item.stake_amount == 100)?.[0]?.status === 'success' ? 'Allready Joined' : 'Join Now',
+
             // maxInvestment: 1499,
             dailyReturn: 5,
-            referelIncome: [10, 15, 30],
-            duration: 30,
+            referelIncome: [10, 15, 20],
+            duration: new Date(monthlyROIHistory.filter(item => item.stake_amount == 100)?.[0]?.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }),
             totalReturn: 15,
             features: [
                 'Maximum daily returns',
@@ -153,10 +172,12 @@ const Packages = () => {
             imgsrc: '/assets/images/pool4.png',
             color: 'purple',
             minInvestment: 1500,
+            btnType: monthlyROIHistory.filter(item => item.stake_amount == 1500)?.[0]?.status === 'success' ? 'Allready Joined' : 'Join Now',
+
             // maxInvestment: 19999,
             dailyReturn: 10,
             referelIncome: [5, 5, 5],
-            duration: 30,
+            duration: new Date(monthlyROIHistory.filter(item => item.stake_amount == 1500)?.[0]?.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }),
             totalReturn: 5,
             features: [
                 'Premium daily returns',
@@ -204,12 +225,24 @@ const Packages = () => {
         setSelectedPackage(pkg);
         onOpen();
     };
-    const handleClickJoinNow = (amount) => {
+    const handleClickJoinNow = async (amount) => {
         // console.log("clicked")
-        const dto={
+        // if (monthlyROIHistory?.[0]?.status !== 'success') {
+        //     toast.warning(`Please join ${pkg.name} package first`);
+        //     return;
+        // }
+        const dto = {
             amount: amount,
         }
-        handleJoinPackage(dto)
+        const result = await handleJoinPackage(dto)
+        console.log("join", result);
+        if (result.status) {
+            toast.success(result?.message)
+
+        }
+        else {
+            toast.error(result?.message)
+        }
     }
 
     const handleInvestmentSubmit = () => {
@@ -249,116 +282,112 @@ const Packages = () => {
     };
 
     return (
-        <Box>
-            <Heading size="lg" mb={6}>
-                Investment Packages
-            </Heading>
+        <>
 
-            <Tabs variant="enclosed" colorScheme="blue">
-                <TabList>
-                    <Tab>Available Packages</Tab>
-                    <Tab>My Investments</Tab>
-                    <Tab>Investment History</Tab>
-                </TabList>
+            <ToastContainer />
 
-                <TabPanels>
-                    {/* Available Packages Tab */}
-                    <TabPanel p={0} pt={6}>
-                        <Alert status="info" mb={6} borderRadius="lg">
-                            <AlertIcon />
-                            <Box>
-                                <AlertTitle>Investment Notice</AlertTitle>
-                                <AlertDescription>
-                                    All investments carry risk. Please read the terms and conditions carefully before investing.
-                                    Past performance does not guarantee future results.
-                                </AlertDescription>
-                            </Box>
-                        </Alert>
+            <Box>
 
-                        <Grid templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(2, 1fr)' }} gap={6}>
-                            {availablePackages.map((pkg) => (
-                                <GridItem key={pkg.id}>
-                                    <Card
-                                        bg={cardBg}
-                                        border="2px"
-                                        borderColor={pkg.popular ? `${pkg.color}.300` : borderColor}
-                                        position="relative"
-                                        _hover={{
-                                            transform: 'translateY(-4px)',
-                                            shadow: 'xl',
-                                        }}
-                                        transition="all 0.3s"
-                                    >
-                                        {pkg.popular && (
-                                            <Badge
-                                                position="absolute"
-                                                top="-10px"
-                                                left="50%"
-                                                transform="translateX(-50%)"
-                                                colorScheme={pkg.color}
-                                                px={3}
-                                                py={1}
-                                                borderRadius="full"
-                                                fontSize="xs"
-                                                fontWeight="bold"
-                                            >
-                                                MOST POPULAR
-                                            </Badge>
-                                        )}
+                <Heading size="lg" mb={6}>
+                    Investment Packages
+                </Heading>
 
-                                        <CardHeader textAlign="center" pb={4}>
-                                            <VStack spacing={3}>
-                                                <Box
-                                                    p={4}
+                <Tabs variant="enclosed" colorScheme="blue">
+                    <TabList>
+                        <Tab>Available Packages</Tab>
+                        <Tab>My Investments</Tab>
+                        <Tab>Investment History</Tab>
+                    </TabList>
+
+                    <TabPanels>
+                        {/* Available Packages Tab */}
+                        <TabPanel p={0} pt={6}>
+
+
+                            <Grid templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(2, 1fr)' }} gap={6}>
+                                {availablePackages.map((pkg) => (
+                                    <GridItem key={pkg.id}>
+                                        <Card
+                                            bg={cardBg}
+                                            border="2px"
+                                            borderColor={pkg.popular ? `${pkg.color}.300` : borderColor}
+                                            position="relative"
+                                            _hover={{
+                                                transform: 'translateY(-4px)',
+                                                shadow: 'xl',
+                                            }}
+                                            transition="all 0.3s"
+                                        >
+                                            {pkg.popular && (
+                                                <Badge
+                                                    position="absolute"
+                                                    top="-10px"
+                                                    left="50%"
+                                                    transform="translateX(-50%)"
+                                                    colorScheme={pkg.color}
+                                                    px={3}
+                                                    py={1}
                                                     borderRadius="full"
-                                                    bg={`${pkg.color}.100`}
-                                                    color={`${pkg.color}.600`}
+                                                    fontSize="xs"
+                                                    fontWeight="bold"
                                                 >
-                                                    <Image src={pkg.imgsrc} boxSize={10} />
-                                                </Box>
-                                                <VStack spacing={1}>
-                                                    <Heading color={'gray.500'} size="md">{pkg.name}</Heading>
-                                                    {/* <Badge
+                                                    MOST POPULAR
+                                                </Badge>
+                                            )}
+
+                                            <CardHeader textAlign="center" pb={4}>
+                                                <VStack spacing={3}>
+                                                    <Box
+                                                        p={4}
+                                                        borderRadius="full"
+                                                        bg={`${pkg.color}.100`}
+                                                        color={`${pkg.color}.600`}
+                                                    >
+                                                        <Image src={pkg.imgsrc} boxSize={10} />
+                                                    </Box>
+                                                    <VStack spacing={1}>
+                                                        <Heading color={'gray.500'} size="md">{pkg.name}</Heading>
+                                                        {/* <Badge
                                                         colorScheme={getRiskColor(pkg.risk)}
                                                         variant="subtle"
                                                     >
                                                         {pkg.risk} Risk
                                                     </Badge> */}
+                                                    </VStack>
                                                 </VStack>
-                                            </VStack>
-                                        </CardHeader>
+                                            </CardHeader>
 
-                                        <CardBody pt={0}>
-                                            <VStack spacing={4} align="stretch">
-                                                {/* Key Stats */}
-                                                <Grid templateColumns="repeat(3, 1fr)" gap={4}>
-                                                    <Box textAlign="center" p={3} bg={useColorModeValue('gray.50', 'gray.700')} borderRadius="lg">
-                                                        <Box fontSize="2xl" fontWeight="bold" color={`${pkg.color}.500`}>
-                                                            {pkg.dailyReturn}%
+                                            <CardBody pt={0}>
+                                                <VStack spacing={4} align="stretch">
+                                                    {/* Key Stats */}
+                                                    <Grid templateColumns="repeat(3, 1fr)" gap={4}>
+                                                        <Box textAlign="center" p={3} bg={useColorModeValue('gray.50', 'gray.700')} borderRadius="lg">
+                                                            <Box fontSize="2xl" fontWeight="bold" color={`${pkg.color}.500`}>
+                                                                {pkg.dailyReturn}%
+                                                            </Box>
+                                                            <Text fontSize="sm" color={textColor}>
+                                                                Monthly Return
+                                                            </Text>
                                                         </Box>
-                                                        <Text fontSize="sm" color={textColor}>
-                                                            Monthly Return
-                                                        </Text>
-                                                    </Box>
-                                                    <Box textAlign="center" p={3} bg={useColorModeValue('gray.50', 'gray.700')} borderRadius="lg">
-                                                        <Box fontSize="2xl" fontWeight="bold" color="green.500">
-                                                            {pkg.totalReturn}%
+                                                        <Box textAlign="center" p={3} bg={useColorModeValue('gray.50', 'gray.700')} borderRadius="lg">
+                                                            <Box fontSize="2xl" fontWeight="bold" color="green.500">
+                                                                {pkg.totalReturn}%
+                                                            </Box>
+                                                            <Text fontSize="sm" color={textColor} fontWeight={600}>
+                                                                3 Level AutoPool Income
+                                                            </Text>
                                                         </Box>
-                                                        <Text fontSize="sm" color={textColor} fontWeight={600}>
-                                                            3 Level AutoPool Income
-                                                        </Text>
-                                                    </Box>
-                                                    <Box textAlign="center" p={3} bg={useColorModeValue('gray.50', 'gray.700')} borderRadius="lg">
-                                                        <Flex justify={'center'}>
-                                                            {
-                                                                pkg.referelIncome.map((income, index) => (
-                                                                    <Box textAlign={'center'} fontSize="xl" fontWeight="bold" color="green.500" key={index}>
-                                                                        {income}%
-                                                                    </Box>
-                                                                ))
-                                                            }
+                                                        <Box textAlign="center" p={3} bg={useColorModeValue('gray.50', 'gray.700')} borderRadius="lg">
+                                                            <Flex justify={'center'}>
+                                                                {
+                                                                    pkg.referelIncome.map((income, index) => (
+                                                                        <Box textAlign={'center'} fontSize="xl" fontWeight="bold" color="green.500" key={index}>
+                                                                            {income}%
+                                                                        </Box>
+                                                                    ))
+                                                                }
 
-                                                            {/* <Box fontSize="2xl" fontWeight="bold" color="green.500">
+                                                                {/* <Box fontSize="2xl" fontWeight="bold" color="green.500">
                                                                 {pkg.totalReturn}%
                                                             </Box>
                                                             <Box fontSize="2xl" fontWeight="bold" color="green.500">
@@ -367,35 +396,39 @@ const Packages = () => {
                                                             <Box fontSize="2xl" fontWeight="bold" color="green.500">
                                                                 {pkg.totalReturn}%
                                                             </Box> */}
-                                                        </Flex>
-                                                        <Text fontSize="sm" color={textColor} fontWeight={600}>
-                                                            3 Level Referral Income
+                                                            </Flex>
+                                                            <Text fontSize="sm" color={textColor} fontWeight={600}>
+                                                                3 Level Referral Income
+                                                            </Text>
+                                                        </Box>
+                                                    </Grid>
+
+                                                    {/* Investment Range */}
+                                                    <Box>
+                                                        <HStack justify="space-between" mb={2}>
+                                                            <Text fontSize="sm" fontWeight="medium">
+                                                                Package Amount
+                                                            </Text>
+                                                            <VStack>
+                                                                <Text fontSize="sm" fontWeight="medium">Join Date</Text>
+                                                                <HStack>
+
+                                                                    <Icon as={FiClock} boxSize={4} color={textColor} />
+                                                                    <Box fontSize="sm" color={textColor}>
+                                                                        {pkg.duration}
+                                                                    </Box>
+                                                                </HStack>
+                                                            </VStack>
+                                                        </HStack>
+                                                        <Text fontSize="lg" fontWeight="bold">
+                                                            ${pkg.minInvestment.toLocaleString()}
                                                         </Text>
                                                     </Box>
-                                                </Grid>
 
-                                                {/* Investment Range */}
-                                                <Box>
-                                                    <HStack justify="space-between" mb={2}>
-                                                        <Text fontSize="sm" fontWeight="medium">
-                                                            Investment Range
-                                                        </Text>
-                                                        <HStack>
-                                                            <Icon as={FiClock} boxSize={4} color={textColor} />
-                                                            <Box fontSize="sm" color={textColor}>
-                                                                {pkg.duration} days
-                                                            </Box>
-                                                        </HStack>
-                                                    </HStack>
-                                                    <Text fontSize="lg" fontWeight="bold">
-                                                        ${pkg.minInvestment.toLocaleString()}
-                                                    </Text>
-                                                </Box>
+                                                    <Divider />
 
-                                                <Divider />
-
-                                                {/* Features */}
-                                                {/* <Box>
+                                                    {/* Features */}
+                                                    {/* <Box>
                                                     <Text fontSize="sm" fontWeight="medium" mb={3}>
                                                         Package Features
                                                     </Text>
@@ -409,262 +442,263 @@ const Packages = () => {
                                                     </VStack>
                                                 </Box> */}
 
-                                                <Button
-                                                    colorScheme={pkg.color}
-                                                    size="lg"
-                                                    onClick={() => handleClickJoinNow(pkg.minInvestment)}
-                                                    leftIcon={<FiDollarSign />}
-                                                >
-                                                    Join Now
-                                                </Button>
+                                                    <Button
+                                                        colorScheme={pkg.color}
+                                                        size="lg"
+                                                        onClick={() => handleClickJoinNow(pkg.minInvestment)}
+                                                    // leftIcon={<FiDollarSign />}
+                                                    >
+                                                        {pkg?.btnType}
+                                                    </Button>
+                                                </VStack>
+                                            </CardBody>
+                                        </Card>
+                                    </GridItem>
+                                ))}
+                            </Grid>
+                        </TabPanel>
+
+                        {/* My Investments Tab */}
+                        <TabPanel p={0} pt={6}>
+                            <Grid templateColumns={{ base: '1fr', lg: 'repeat(2, 1fr)' }} gap={6} mb={6}>
+                                <Card bg={cardBg} border="1px" borderColor={borderColor}>
+                                    <CardBody>
+                                        <Stat>
+                                            <StatLabel>Total Invested</StatLabel>
+                                            <StatNumber color="blue.500">$1,500</StatNumber>
+                                            <StatHelpText>Across 2 packages</StatHelpText>
+                                        </Stat>
+                                    </CardBody>
+                                </Card>
+                                <Card bg={cardBg} border="1px" borderColor={borderColor}>
+                                    <CardBody>
+                                        <Stat>
+                                            <StatLabel>Total Earned</StatLabel>
+                                            <StatNumber color="green.500">$170.70</StatNumber>
+                                            <StatHelpText>11.38% return</StatHelpText>
+                                        </Stat>
+                                    </CardBody>
+                                </Card>
+                            </Grid>
+
+                            <Grid templateColumns={{ base: '1fr', lg: 'repeat(2, 1fr)' }} gap={6}>
+                                {activeInvestments.map((investment) => (
+                                    <Card key={investment.id} bg={cardBg} border="1px" borderColor={borderColor}>
+                                        <CardHeader>
+                                            <HStack justify="space-between">
+                                                <Heading size="sm">{investment.packageName}</Heading>
+                                                <Badge colorScheme="green" variant="subtle">
+                                                    {investment.status}
+                                                </Badge>
+                                            </HStack>
+                                        </CardHeader>
+                                        <CardBody pt={0}>
+                                            <VStack spacing={4} align="stretch">
+                                                <Grid templateColumns="repeat(2, 1fr)" gap={4}>
+                                                    <Box>
+                                                        <Text fontSize="sm" color={textColor}>Investment</Text>
+                                                        <Text fontWeight="bold">${investment.investment}</Text>
+                                                    </Box>
+                                                    <Box>
+                                                        <Text fontSize="sm" color={textColor}>Daily Return</Text>
+                                                        <Text fontWeight="bold" color="green.500">{investment.dailyReturn}%</Text>
+                                                    </Box>
+                                                    <Box>
+                                                        <Text fontSize="sm" color={textColor}>Total Earned</Text>
+                                                        <Text fontWeight="bold" color="green.500">${investment.totalEarned}</Text>
+                                                    </Box>
+                                                    <Box>
+                                                        <Text fontSize="sm" color={textColor}>Days Left</Text>
+                                                        <Text fontWeight="bold">{investment.daysLeft}</Text>
+                                                    </Box>
+                                                </Grid>
+
+                                                <Box>
+                                                    <HStack justify="space-between" mb={2}>
+                                                        <Text fontSize="sm" color={textColor}>Progress</Text>
+                                                        <Text fontSize="sm" color={textColor}>{investment.progress}%</Text>
+                                                    </HStack>
+                                                    <Progress
+                                                        value={investment.progress}
+                                                        colorScheme="blue"
+                                                        size="md"
+                                                        borderRadius="full"
+                                                    />
+                                                </Box>
+
+                                                <HStack justify="space-between" fontSize="sm" color={textColor}>
+                                                    <Text>Start: {investment.startDate}</Text>
+                                                    <Text>End: {investment.endDate}</Text>
+                                                </HStack>
                                             </VStack>
                                         </CardBody>
                                     </Card>
-                                </GridItem>
-                            ))}
-                        </Grid>
-                    </TabPanel>
+                                ))}
+                            </Grid>
+                        </TabPanel>
 
-                    {/* My Investments Tab */}
-                    <TabPanel p={0} pt={6}>
-                        <Grid templateColumns={{ base: '1fr', lg: 'repeat(2, 1fr)' }} gap={6} mb={6}>
+                        {/* Investment History Tab */}
+                        <TabPanel p={0} pt={6}>
                             <Card bg={cardBg} border="1px" borderColor={borderColor}>
-                                <CardBody>
-                                    <Stat>
-                                        <StatLabel>Total Invested</StatLabel>
-                                        <StatNumber color="blue.500">$1,500</StatNumber>
-                                        <StatHelpText>Across 2 packages</StatHelpText>
-                                    </Stat>
+                                <CardHeader>
+                                    <Heading size="md">Investment History</Heading>
+                                </CardHeader>
+                                <CardBody pt={0}>
+                                    <TableContainer>
+                                        <Table variant="simple">
+                                            <Thead>
+                                                <Tr>
+                                                    <Th>Package</Th>
+                                                    <Th>Investment</Th>
+                                                    <Th>Duration</Th>
+                                                    <Th>Total Return</Th>
+                                                    <Th>Status</Th>
+                                                    <Th>Date</Th>
+                                                </Tr>
+                                            </Thead>
+                                            <Tbody>
+                                                <Tr>
+                                                    <Td>Gold Package</Td>
+                                                    <Td>$1,000</Td>
+                                                    <Td>45 days</Td>
+                                                    <Td color="green.500">$125.50</Td>
+                                                    <Td>
+                                                        <Badge colorScheme="green" variant="subtle">
+                                                            Active
+                                                        </Badge>
+                                                    </Td>
+                                                    <Td>2024-01-01</Td>
+                                                </Tr>
+                                                <Tr>
+                                                    <Td>Silver Package</Td>
+                                                    <Td>$500</Td>
+                                                    <Td>30 days</Td>
+                                                    <Td color="green.500">$45.20</Td>
+                                                    <Td>
+                                                        <Badge colorScheme="green" variant="subtle">
+                                                            Active
+                                                        </Badge>
+                                                    </Td>
+                                                    <Td>2023-12-15</Td>
+                                                </Tr>
+                                                <Tr>
+                                                    <Td>Starter Package</Td>
+                                                    <Td>$200</Td>
+                                                    <Td>30 days</Td>
+                                                    <Td color="green.500">$29.00</Td>
+                                                    <Td>
+                                                        <Badge colorScheme="gray" variant="subtle">
+                                                            Completed
+                                                        </Badge>
+                                                    </Td>
+                                                    <Td>2023-11-01</Td>
+                                                </Tr>
+                                            </Tbody>
+                                        </Table>
+                                    </TableContainer>
                                 </CardBody>
                             </Card>
-                            <Card bg={cardBg} border="1px" borderColor={borderColor}>
-                                <CardBody>
-                                    <Stat>
-                                        <StatLabel>Total Earned</StatLabel>
-                                        <StatNumber color="green.500">$170.70</StatNumber>
-                                        <StatHelpText>11.38% return</StatHelpText>
-                                    </Stat>
-                                </CardBody>
-                            </Card>
-                        </Grid>
+                        </TabPanel>
+                    </TabPanels>
+                </Tabs>
 
-                        <Grid templateColumns={{ base: '1fr', lg: 'repeat(2, 1fr)' }} gap={6}>
-                            {activeInvestments.map((investment) => (
-                                <Card key={investment.id} bg={cardBg} border="1px" borderColor={borderColor}>
-                                    <CardHeader>
-                                        <HStack justify="space-between">
-                                            <Heading size="sm">{investment.packageName}</Heading>
-                                            <Badge colorScheme="green" variant="subtle">
-                                                {investment.status}
-                                            </Badge>
-                                        </HStack>
-                                    </CardHeader>
-                                    <CardBody pt={0}>
-                                        <VStack spacing={4} align="stretch">
-                                            <Grid templateColumns="repeat(2, 1fr)" gap={4}>
-                                                <Box>
-                                                    <Text fontSize="sm" color={textColor}>Investment</Text>
-                                                    <Text fontWeight="bold">${investment.investment}</Text>
-                                                </Box>
-                                                <Box>
-                                                    <Text fontSize="sm" color={textColor}>Daily Return</Text>
-                                                    <Text fontWeight="bold" color="green.500">{investment.dailyReturn}%</Text>
-                                                </Box>
-                                                <Box>
-                                                    <Text fontSize="sm" color={textColor}>Total Earned</Text>
-                                                    <Text fontWeight="bold" color="green.500">${investment.totalEarned}</Text>
-                                                </Box>
-                                                <Box>
-                                                    <Text fontSize="sm" color={textColor}>Days Left</Text>
-                                                    <Text fontWeight="bold">{investment.daysLeft}</Text>
-                                                </Box>
-                                            </Grid>
-
+                {/* Investment Modal */}
+                <Modal isOpen={isOpen} onClose={onClose} size="lg">
+                    <ModalOverlay />
+                    <ModalContent>
+                        <ModalHeader>
+                            Invest in {selectedPackage?.name}
+                        </ModalHeader>
+                        <ModalCloseButton />
+                        <ModalBody>
+                            {selectedPackage && (
+                                <VStack spacing={6} align="stretch">
+                                    {/* Package Summary */}
+                                    <Box p={4} bg={useColorModeValue('gray.50', 'gray.700')} borderRadius="lg">
+                                        <Grid templateColumns="repeat(3, 1fr)" gap={4} textAlign="center">
                                             <Box>
-                                                <HStack justify="space-between" mb={2}>
-                                                    <Text fontSize="sm" color={textColor}>Progress</Text>
-                                                    <Text fontSize="sm" color={textColor}>{investment.progress}%</Text>
-                                                </HStack>
-                                                <Progress
-                                                    value={investment.progress}
-                                                    colorScheme="blue"
-                                                    size="md"
-                                                    borderRadius="full"
-                                                />
+                                                <Text fontSize="lg" fontWeight="bold" color={`${selectedPackage.color}.500`}>
+                                                    {selectedPackage.dailyReturn}%
+                                                </Text>
+                                                <Text fontSize="sm" color={textColor}>Daily Return</Text>
                                             </Box>
-
-                                            <HStack justify="space-between" fontSize="sm" color={textColor}>
-                                                <Text>Start: {investment.startDate}</Text>
-                                                <Text>End: {investment.endDate}</Text>
-                                            </HStack>
-                                        </VStack>
-                                    </CardBody>
-                                </Card>
-                            ))}
-                        </Grid>
-                    </TabPanel>
-
-                    {/* Investment History Tab */}
-                    <TabPanel p={0} pt={6}>
-                        <Card bg={cardBg} border="1px" borderColor={borderColor}>
-                            <CardHeader>
-                                <Heading size="md">Investment History</Heading>
-                            </CardHeader>
-                            <CardBody pt={0}>
-                                <TableContainer>
-                                    <Table variant="simple">
-                                        <Thead>
-                                            <Tr>
-                                                <Th>Package</Th>
-                                                <Th>Investment</Th>
-                                                <Th>Duration</Th>
-                                                <Th>Total Return</Th>
-                                                <Th>Status</Th>
-                                                <Th>Date</Th>
-                                            </Tr>
-                                        </Thead>
-                                        <Tbody>
-                                            <Tr>
-                                                <Td>Gold Package</Td>
-                                                <Td>$1,000</Td>
-                                                <Td>45 days</Td>
-                                                <Td color="green.500">$125.50</Td>
-                                                <Td>
-                                                    <Badge colorScheme="green" variant="subtle">
-                                                        Active
-                                                    </Badge>
-                                                </Td>
-                                                <Td>2024-01-01</Td>
-                                            </Tr>
-                                            <Tr>
-                                                <Td>Silver Package</Td>
-                                                <Td>$500</Td>
-                                                <Td>30 days</Td>
-                                                <Td color="green.500">$45.20</Td>
-                                                <Td>
-                                                    <Badge colorScheme="green" variant="subtle">
-                                                        Active
-                                                    </Badge>
-                                                </Td>
-                                                <Td>2023-12-15</Td>
-                                            </Tr>
-                                            <Tr>
-                                                <Td>Starter Package</Td>
-                                                <Td>$200</Td>
-                                                <Td>30 days</Td>
-                                                <Td color="green.500">$29.00</Td>
-                                                <Td>
-                                                    <Badge colorScheme="gray" variant="subtle">
-                                                        Completed
-                                                    </Badge>
-                                                </Td>
-                                                <Td>2023-11-01</Td>
-                                            </Tr>
-                                        </Tbody>
-                                    </Table>
-                                </TableContainer>
-                            </CardBody>
-                        </Card>
-                    </TabPanel>
-                </TabPanels>
-            </Tabs>
-
-            {/* Investment Modal */}
-            <Modal isOpen={isOpen} onClose={onClose} size="lg">
-                <ModalOverlay />
-                <ModalContent>
-                    <ModalHeader>
-                        Invest in {selectedPackage?.name}
-                    </ModalHeader>
-                    <ModalCloseButton />
-                    <ModalBody>
-                        {selectedPackage && (
-                            <VStack spacing={6} align="stretch">
-                                {/* Package Summary */}
-                                <Box p={4} bg={useColorModeValue('gray.50', 'gray.700')} borderRadius="lg">
-                                    <Grid templateColumns="repeat(3, 1fr)" gap={4} textAlign="center">
-                                        <Box>
-                                            <Text fontSize="lg" fontWeight="bold" color={`${selectedPackage.color}.500`}>
-                                                {selectedPackage.dailyReturn}%
-                                            </Text>
-                                            <Text fontSize="sm" color={textColor}>Daily Return</Text>
-                                        </Box>
-                                        <Box>
-                                            <Text fontSize="lg" fontWeight="bold" color="green.500">
-                                                {selectedPackage.totalReturn}%
-                                            </Text>
-                                            <Text fontSize="sm" color={textColor}>Total Return</Text>
-                                        </Box>
-                                        <Box>
-                                            <Text fontSize="lg" fontWeight="bold">
-                                                {selectedPackage.duration}
-                                            </Text>
-                                            <Text fontSize="sm" color={textColor}>Days</Text>
-                                        </Box>
-                                    </Grid>
-                                </Box>
-
-                                <FormControl>
-                                    <FormLabel>Investment Amount</FormLabel>
-                                    <Input
-                                        type="number"
-                                        placeholder={`Min: $${selectedPackage.minInvestment} - Max: $${selectedPackage.maxInvestment}`}
-                                        value={investmentAmount}
-                                        onChange={(e) => setInvestmentAmount(e.target.value)}
-                                    />
-                                    <Text fontSize="sm" color={textColor} mt={1}>
-                                        Investment range: ${selectedPackage?.minInvestment?.toLocaleString()} - ${selectedPackage?.maxInvestment?.toLocaleString()}
-                                    </Text>
-                                </FormControl>
-
-                                {investmentAmount && (
-                                    <Box p={4} bg={useColorModeValue('blue.50', 'blue.900')} borderRadius="lg">
-                                        <Text fontSize="sm" fontWeight="medium" mb={2}>Investment Summary:</Text>
-                                        <VStack spacing={1} align="stretch" fontSize="sm">
-                                            <HStack justify="space-between">
-                                                <Text>Investment Amount:</Text>
-                                                <Text fontWeight="bold">${parseFloat(investmentAmount || 0).toLocaleString()}</Text>
-                                            </HStack>
-                                            <HStack justify="space-between">
-                                                <Text>Daily Return ({selectedPackage.dailyReturn}%):</Text>
-                                                <Text fontWeight="bold" color="green.500">
-                                                    ${((parseFloat(investmentAmount || 0) * selectedPackage.dailyReturn) / 100).toFixed(2)}
+                                            <Box>
+                                                <Text fontSize="lg" fontWeight="bold" color="green.500">
+                                                    {selectedPackage.totalReturn}%
                                                 </Text>
-                                            </HStack>
-                                            <HStack justify="space-between">
-                                                <Text>Total Expected Return:</Text>
-                                                <Text fontWeight="bold" color="green.500">
-                                                    ${((parseFloat(investmentAmount || 0) * selectedPackage.totalReturn) / 100).toFixed(2)}
+                                                <Text fontSize="sm" color={textColor}>Total Return</Text>
+                                            </Box>
+                                            <Box>
+                                                <Text fontSize="lg" fontWeight="bold">
+                                                    {selectedPackage.duration}
                                                 </Text>
-                                            </HStack>
-                                        </VStack>
+                                                <Text fontSize="sm" color={textColor}>Days</Text>
+                                            </Box>
+                                        </Grid>
                                     </Box>
-                                )}
 
-                                <Alert status="warning" borderRadius="lg">
-                                    <AlertIcon />
-                                    <AlertDescription fontSize="sm">
-                                        Please ensure you understand the risks involved. All investments carry the risk of loss.
-                                    </AlertDescription>
-                                </Alert>
-                            </VStack>
-                        )}
-                    </ModalBody>
-                    <ModalFooter>
-                        <Button variant="ghost" mr={3} onClick={onClose}>
-                            Cancel
-                        </Button>
-                        <Button
-                            colorScheme="blue"
-                            onClick={handleInvestmentSubmit}
-                            isDisabled={!investmentAmount}
-                        >
-                            Confirm Investment
-                        </Button>
-                    </ModalFooter>
-                </ModalContent>
-            </Modal>
-        </Box>
+                                    <FormControl>
+                                        <FormLabel>Investment Amount</FormLabel>
+                                        <Input
+                                            type="number"
+                                            placeholder={`Min: $${selectedPackage.minInvestment} - Max: $${selectedPackage.maxInvestment}`}
+                                            value={investmentAmount}
+                                            onChange={(e) => setInvestmentAmount(e.target.value)}
+                                        />
+                                        <Text fontSize="sm" color={textColor} mt={1}>
+                                            Investment range: ${selectedPackage?.minInvestment?.toLocaleString()} - ${selectedPackage?.maxInvestment?.toLocaleString()}
+                                        </Text>
+                                    </FormControl>
+
+                                    {investmentAmount && (
+                                        <Box p={4} bg={useColorModeValue('blue.50', 'blue.900')} borderRadius="lg">
+                                            <Text fontSize="sm" fontWeight="medium" mb={2}>Investment Summary:</Text>
+                                            <VStack spacing={1} align="stretch" fontSize="sm">
+                                                <HStack justify="space-between">
+                                                    <Text>Investment Amount:</Text>
+                                                    <Text fontWeight="bold">${parseFloat(investmentAmount || 0).toLocaleString()}</Text>
+                                                </HStack>
+                                                <HStack justify="space-between">
+                                                    <Text>Daily Return ({selectedPackage.dailyReturn}%):</Text>
+                                                    <Text fontWeight="bold" color="green.500">
+                                                        ${((parseFloat(investmentAmount || 0) * selectedPackage.dailyReturn) / 100).toFixed(2)}
+                                                    </Text>
+                                                </HStack>
+                                                <HStack justify="space-between">
+                                                    <Text>Total Expected Return:</Text>
+                                                    <Text fontWeight="bold" color="green.500">
+                                                        ${((parseFloat(investmentAmount || 0) * selectedPackage.totalReturn) / 100).toFixed(2)}
+                                                    </Text>
+                                                </HStack>
+                                            </VStack>
+                                        </Box>
+                                    )}
+
+                                    <Alert status="warning" borderRadius="lg">
+                                        <AlertIcon />
+                                        <AlertDescription fontSize="sm">
+                                            Please ensure you understand the risks involved. All investments carry the risk of loss.
+                                        </AlertDescription>
+                                    </Alert>
+                                </VStack>
+                            )}
+                        </ModalBody>
+                        <ModalFooter>
+                            <Button variant="ghost" mr={3} onClick={onClose}>
+                                Cancel
+                            </Button>
+                            <Button
+                                colorScheme="blue"
+                                onClick={handleInvestmentSubmit}
+                                isDisabled={!investmentAmount}
+                            >
+                                Confirm Investment
+                            </Button>
+                        </ModalFooter>
+                    </ModalContent>
+                </Modal>
+            </Box>
+        </>
     );
 };
 

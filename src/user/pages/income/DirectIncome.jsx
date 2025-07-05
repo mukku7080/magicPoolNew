@@ -161,7 +161,7 @@ const DirectIncome = () => {
                         />
                         <VStack align="start" spacing={1}>
                             <Heading size="lg" color={textColor}>
-                                Direct Income (Referral Income)
+                                Direct Income 
                             </Heading>
                             <Text color={mutedColor}>
                                 Track your referral earnings and bonuses
@@ -192,7 +192,7 @@ const DirectIncome = () => {
                 </Flex>
 
                 {/* Stats Cards */}
-                <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6} mb={8}>
+                <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6} mb={8}>
                     <Card bg={cardBg} borderColor={borderColor} shadow="md">
                         <CardBody>
                             <Stat>
@@ -200,10 +200,7 @@ const DirectIncome = () => {
                                 <StatNumber color={textColor} fontSize="2xl">
                                     {formatCurrency(directIncomeStats.totalIncome)}
                                 </StatNumber>
-                                <StatHelpText>
-                                    <StatArrow type="increase" />
-                                    All time earnings
-                                </StatHelpText>
+                         
                             </Stat>
                         </CardBody>
                     </Card>
@@ -215,28 +212,12 @@ const DirectIncome = () => {
                                 <StatNumber color="green.500" fontSize="2xl">
                                     {formatCurrency(directIncomeStats.todayIncome)}
                                 </StatNumber>
-                                <StatHelpText>
-                                    <StatArrow type="increase" />
-                                    Today's earnings
-                                </StatHelpText>
+                              
                             </Stat>
                         </CardBody>
                     </Card>
 
-                    <Card bg={cardBg} borderColor={borderColor} shadow="md">
-                        <CardBody>
-                            <Stat>
-                                <StatLabel color={mutedColor}>This Month</StatLabel>
-                                <StatNumber color="blue.500" fontSize="2xl">
-                                    {formatCurrency(directIncomeStats.thisMonthIncome)}
-                                </StatNumber>
-                                <StatHelpText>
-                                    <StatArrow type="increase" />
-                                    Monthly earnings
-                                </StatHelpText>
-                            </Stat>
-                        </CardBody>
-                    </Card>
+                
                 </SimpleGrid>
 
                 {/* History Table */}

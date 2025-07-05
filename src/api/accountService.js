@@ -257,11 +257,9 @@ class AccountService {
 
             console.log('✅ join package response:', response);
 
-            return {
-                success: true,
-                data: response.data,
-                message: response?.data?.message || 'Account statistics loaded successfully'
-            };
+            return response.data;
+
+
         } catch (error) {
             console.error('❌ Get account stats error:', error);
             throw {

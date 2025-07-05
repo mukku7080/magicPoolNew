@@ -204,14 +204,11 @@ const MonthlyROI = () => {
                     <Card bg={cardBg} borderColor={borderColor} shadow="md">
                         <CardBody>
                             <Stat>
-                                <StatLabel color={mutedColor}>Mining Amount</StatLabel>
+                                <StatLabel color={mutedColor}>Invested Amount</StatLabel>
                                 <StatNumber color={textColor} fontSize="2xl">
                                     {formatCurrency(monthlyROIHistory?.data?.mining_amount)}
                                 </StatNumber>
-                                <StatHelpText>
-                                    <StatArrow type="increase" />
-                                    Total invested
-                                </StatHelpText>
+                               
                             </Stat>
                         </CardBody>
                     </Card>
@@ -223,10 +220,7 @@ const MonthlyROI = () => {
                                 <StatNumber color="green.500" fontSize="2xl">
                                     {formatCurrency(monthlyROIHistory?.data?.total_credit)}
                                 </StatNumber>
-                                <StatHelpText>
-                                    <StatArrow type="increase" />
-                                    Total earnings
-                                </StatHelpText>
+                             
                             </Stat>
                         </CardBody>
                     </Card>
@@ -238,10 +232,7 @@ const MonthlyROI = () => {
                                 <StatNumber color="blue.500" fontSize="2xl">
                                     {formatCurrency(monthlyROIHistory?.data?.today_credit)}
                                 </StatNumber>
-                                <StatHelpText>
-                                    <StatArrow type="increase" />
-                                    Today's credit
-                                </StatHelpText>
+                              
                             </Stat>
                         </CardBody>
                     </Card>
@@ -363,7 +354,7 @@ const MonthlyROI = () => {
                                                         <HStack spacing={2}>
                                                             {/* <Icon as={FiCalendar} color={mutedColor} size="sm" /> */}
                                                             <Box fontSize="sm" color={textColor}>
-                                                               {item?.stake_status}
+                                                               {item?.status}
                                                             </Box>
                                                         </HStack>
                                                     </Td>

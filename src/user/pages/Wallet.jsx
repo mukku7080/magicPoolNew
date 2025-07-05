@@ -32,6 +32,7 @@ import {
     AlertTitle,
     AlertDescription,
     IconButton,
+    Image,
 } from '@chakra-ui/react';
 import {
     FiTrendingUp,
@@ -111,7 +112,7 @@ const Wallet = () => {
             icon: AiFillWallet,
             color: 'red',
         },
-          {
+        {
             label: 'Available Amount',
             value: userData?.available_amount,
             change: '+11.2%',
@@ -119,12 +120,13 @@ const Wallet = () => {
             icon: AiOutlineBank,
             color: 'red',
         },
-          {
+        {
             label: 'Map Point',
             value: '0',
             change: '+11.2%',
             isPositive: true,
             icon: FaMoneyBill,
+            imgsrc: '/assets/images/maptoken.png',
             color: 'red',
         },
     ];
@@ -278,7 +280,11 @@ const Wallet = () => {
                                         bg={`${stat.color}.100`}
                                         color={`${stat.color}.600`}
                                     >
-                                        <Icon as={stat.icon} boxSize={6} />
+                                        {
+                                            stat.imgsrc ?
+                                                <Image src={stat.imgsrc} alt={stat.currency} boxSize={6} /> :
+                                                <Icon as={stat.icon} boxSize={6} />
+                                        }
                                     </Box>
                                     {/* <IconButton
                                         size="sm"
@@ -307,8 +313,8 @@ const Wallet = () => {
             </Grid>
 
             {/* <Grid templateColumns={{ base: '1fr', lg: '1fr' }} gap={6}> */}
-                {/* Transaction History */}
-                {/* <GridItem>
+            {/* Transaction History */}
+            {/* <GridItem>
                     <Card bg={cardBg} border="1px" borderColor={borderColor}>
                         <CardHeader>
                             <HStack justify="space-between">

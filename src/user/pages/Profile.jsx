@@ -132,7 +132,7 @@ const Profile = () => {
 
     // Update local state when profile data is loaded from API
     useEffect(() => {
-        if (profile) {     
+        if (profile) {
 
             // Handle both USER structure and direct profile structure
             const userData = profile?.USER;
@@ -561,30 +561,13 @@ const Profile = () => {
                                     </Text>
                                     <HStack spacing={2}>
                                         <Badge colorScheme="green" variant="subtle">
-                                            {profile?.verified || profile?.email_verified ? 'Verified' : 'Unverified'}
+                                            {profile?.USER?.stake_status}
                                         </Badge>
-                                        <Badge colorScheme="purple" variant="subtle">
-                                            {profile?.plan || profile?.subscription || 'Basic'}
-                                        </Badge>
+
                                     </HStack>
                                 </VStack>
 
-                                <Box w="full">
-                                    <HStack justify="space-between" mb={2}>
-                                        <Text fontSize="sm" color={textColor}>
-                                            Profile Completeness
-                                        </Text>
-                                        <Text fontSize="sm" fontWeight="medium">
-                                            {profileCompleteness}%
-                                        </Text>
-                                    </HStack>
-                                    <Progress
-                                        value={profileCompleteness}
-                                        colorScheme="blue"
-                                        size="sm"
-                                        borderRadius="full"
-                                    />
-                                </Box>
+
                             </VStack>
                         </CardBody>
                     </Card>
@@ -610,13 +593,7 @@ const Profile = () => {
                                     </HStack>
                                     <Icon as={FiCheck} color="green.500" />
                                 </HStack>
-                                <HStack justify="space-between">
-                                    <HStack>
-                                        <Icon as={AiOutlineUser} color="orange.500" />
-                                        <Text fontSize="sm">KYC Pending</Text>
-                                    </HStack>
-                                    <Icon as={FiX} color="orange.500" />
-                                </HStack>
+                           
                             </VStack>
                         </CardBody>
                     </Card>
@@ -627,7 +604,6 @@ const Profile = () => {
                     <Tabs variant="enclosed" colorScheme="blue">
                         <TabList>
                             <Tab>Personal Information</Tab>
-                            <Tab>Security Settings</Tab>
                             <Tab>Change Password</Tab>
                         </TabList>
 
@@ -714,10 +690,10 @@ const Profile = () => {
                                             <FormControl>
                                                 <FormLabel fontSize="sm">Phone</FormLabel>
                                                 <Input
-                                                    value={profileData?.mobile || profileData?.phone || ''}
+                                                    value={profileData?.mobile}
                                                     color={textColor}
 
-                                                    onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
+                                                    onChange={(e) => setProfileData({ ...profileData, mobile: e.target.value })}
                                                     isReadOnly={!isEditing}
                                                     bg={isEditing ? 'white' : 'gray.50'}
                                                     placeholder="Enter your phone number"
@@ -833,7 +809,7 @@ const Profile = () => {
                                                     placeholder="Tell us about yourself..."
                                                     resize="vertical"
                                                     color={textColor}
-                                                    
+
                                                 />
                                             </FormControl>
                                         </Grid>
@@ -859,102 +835,7 @@ const Profile = () => {
                             </TabPanel>
 
                             {/* Security Settings Tab */}
-                            <TabPanel p={0} pt={6}>
-                                <Card bg={cardBg} border="1px" borderColor={borderColor}>
-                                    <CardHeader>
-                                        <Heading size="md">Security Settings</Heading>
-                                    </CardHeader>
-                                    <CardBody pt={0}>
-                                        <VStack spacing={6} align="stretch">
-                                            <Alert status="info" borderRadius="lg">
-                                                <AlertIcon />
-                                                <Box>
-                                                    <AlertTitle>Security Tip!</AlertTitle>
-                                                    <AlertDescription>
-                                                        Enable two-factor authentication for enhanced account security.
-                                                    </AlertDescription>
-                                                </Box>
-                                            </Alert>
-
-                                            <VStack spacing={4} align="stretch">
-                                                <HStack justify="space-between">
-                                                    <VStack align="start" spacing={0}>
-                                                        <Text fontWeight="medium">Two-Factor Authentication</Text>
-                                                        <Text fontSize="sm" color={textColor}>
-                                                            Add an extra layer of security to your account
-                                                        </Text>
-                                                    </VStack>
-                                                    <Switch
-                                                        isChecked={securitySettings.twoFactorAuth}
-                                                        onChange={(e) => setSecuritySettings({
-                                                            ...securitySettings,
-                                                            twoFactorAuth: e.target.checked
-                                                        })}
-                                                        colorScheme="blue"
-                                                    />
-                                                </HStack>
-
-                                                <Divider />
-
-                                                <HStack justify="space-between">
-                                                    <VStack align="start" spacing={0}>
-                                                        <Text fontWeight="medium">Email Notifications</Text>
-                                                        <Text fontSize="sm" color={textColor}>
-                                                            Receive email alerts for account activities
-                                                        </Text>
-                                                    </VStack>
-                                                    <Switch
-                                                        isChecked={securitySettings.emailNotifications}
-                                                        onChange={(e) => setSecuritySettings({
-                                                            ...securitySettings,
-                                                            emailNotifications: e.target.checked
-                                                        })}
-                                                        colorScheme="blue"
-                                                    />
-                                                </HStack>
-
-                                                <Divider />
-
-                                                <HStack justify="space-between">
-                                                    <VStack align="start" spacing={0}>
-                                                        <Text fontWeight="medium">SMS Notifications</Text>
-                                                        <Text fontSize="sm" color={textColor}>
-                                                            Receive SMS alerts for important activities
-                                                        </Text>
-                                                    </VStack>
-                                                    <Switch
-                                                        isChecked={securitySettings.smsNotifications}
-                                                        onChange={(e) => setSecuritySettings({
-                                                            ...securitySettings,
-                                                            smsNotifications: e.target.checked
-                                                        })}
-                                                        colorScheme="blue"
-                                                    />
-                                                </HStack>
-
-                                                <Divider />
-
-                                                <HStack justify="space-between">
-                                                    <VStack align="start" spacing={0}>
-                                                        <Text fontWeight="medium">Login Alerts</Text>
-                                                        <Text fontSize="sm" color={textColor}>
-                                                            Get notified when someone logs into your account
-                                                        </Text>
-                                                    </VStack>
-                                                    <Switch
-                                                        isChecked={securitySettings.loginAlerts}
-                                                        onChange={(e) => setSecuritySettings({
-                                                            ...securitySettings,
-                                                            loginAlerts: e.target.checked
-                                                        })}
-                                                        colorScheme="blue"
-                                                    />
-                                                </HStack>
-                                            </VStack>
-                                        </VStack>
-                                    </CardBody>
-                                </Card>
-                            </TabPanel>
+                       
 
                             {/* Change Password Tab */}
                             <TabPanel p={0} pt={6}>
