@@ -53,14 +53,26 @@ axiosInstance.interceptors.response.use(
     (error) => {
         // Handle common error responses
         if (error.response) {
-            const { status, data } = error.response;
+            const { status, data, config } = error.response;
 
             switch (status) {
                 case 401:
-                    // Unauthorized - clear token and redirect to login
-                    localStorage.removeItem('authToken');
-                    localStorage.removeItem('user');
-                    window.location.href = '/login';
+                    // Check if the failing request is specifically for '/profile' endpoint
+                    const isProfileRequest = config.url && (
+                        config.url.includes('/profile') ||
+                        config.url.endsWith('/profile')
+                    );
+
+                    if (isProfileRequest) {
+                        // Unauthorized on profile endpoint - clear token and redirect to login
+                        console.log('🚪 Profile authentication failed - redirecting to login');
+                        localStorage.removeItem('authToken');
+                        localStorage.removeItem('user');
+                        window.location.href = '/login';
+                    } else {
+                        // For other 401 responses, just log the error without redirecting
+                        console.error('❌ Unauthorized Access:', data.message || 'Authentication failed for this request');
+                    }
                     break;
 
                 case 403:
