@@ -45,6 +45,7 @@ import { AiOutlineWallet, AiOutlineBank } from 'react-icons/ai';
 import ReferralButton from '../../Components/ReferralButton';
 import { useUser } from '../../Context';
 import axios from 'axios';
+import Tickermarque from '../../Pages/Tickermarque';
 
 
 const Dashboard = () => {

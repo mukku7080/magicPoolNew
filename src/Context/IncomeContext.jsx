@@ -38,6 +38,14 @@ export const IncomeProvider = ({ children }) => {
         todayCredit: 0,
         totalCredit: 0
     });
+    const [pooldata, setPoolData] = useState([]);
+    const [totalinvestment, setTotalInvestment] = useState();
+    const [totalincome, setTotalIncome] = useState();
+
+
+    const [pooltreedata, setPoolTreeData] = useState([]);
+
+
 
     // Get Direct Income History
     const getDirectIncomeHistory = async () => {
@@ -102,13 +110,46 @@ export const IncomeProvider = ({ children }) => {
             setIsLoading(true);
             setError(null);
             const response = await incomeService.getMiningDetails();
-            console.log("Responseroi", response);
             if (response.success) {
                 setMonthlyROIHistory(response?.data?.data || []);
-              
+
             }
         } catch (err) {
             setError(err.message || 'Failed to fetch monthly ROI history');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const getPoolData = async () => {
+        try {
+            setIsLoading(true);
+            setError(null);
+            const response = await incomeService.getPoolData();
+            console.log("getdatapool", response);
+            setPoolData(response?.data || []);
+            setTotalInvestment(response?.totalInvestment);
+            setTotalIncome(response?.totalIncome);
+            console.log(response?.totalInvestment);
+            console.log(response?.totalIncome);
+
+        } catch (err) {
+            setError(err.message || 'Failed to fetch pool data ');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    const getPoolTreeData = async (request) => {
+        try {
+            setIsLoading(true);
+            setError(null);
+            const response = await incomeService.getPoolTreeData(request);
+            console.log("getdatatreepool", response);
+            setPoolTreeData(response?.data || []);
+
+
+        } catch (err) {
+            setError(err.message || 'Failed to fetch pool data ');
         } finally {
             setIsLoading(false);
         }
@@ -138,13 +179,18 @@ export const IncomeProvider = ({ children }) => {
         levelIncomeStats,
         monthlyROIHistory,
         monthlyROIStats,
-
+        pooldata,
+        totalinvestment,
+        totalincome,
+        pooltreedata,
         // Functions
         getDirectIncomeHistory,
         getLevelIncomeHistory,
         getMonthlyROIHistory,
         clearError,
         refreshAllData,
+        getPoolData,
+        getPoolTreeData
     };
 
     return (

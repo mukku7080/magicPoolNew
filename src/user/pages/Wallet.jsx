@@ -82,7 +82,7 @@ const Wallet = () => {
         },
         {
             label: 'Autopool Income',
-            value: userData?.level_income,
+            value: userData?.auto_pool_income,
             change: '+15.3%',
             isPositive: true,
             icon: FiDollarSign,

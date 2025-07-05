@@ -66,6 +66,27 @@ class IncomeService {
             };
         }
     }
+    async getPoolData() {
+        try {
+            const response = await axiosInstance.get('/get-pool-data');
+            console.log(response);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching mining details:', error);
+            return error;
+        }
+    }
+    async getPoolTreeData(request) {
+        try {
+            const response = await axiosInstance.post('/get-pool-tree-data', request);
+            console.log(response);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching mining details:', error);
+            return error;
+        }
+    }
 }
+
 
 export const incomeService = new IncomeService();

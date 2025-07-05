@@ -63,7 +63,7 @@ import {
     FiCalendar,
 } from 'react-icons/fi';
 import { AiOutlineRocket, AiOutlineCrown, AiOutlineStar } from 'react-icons/ai';
-import { useAccount } from '../../Context';
+import { useAccount, useUser } from '../../Context';
 import { toast, ToastContainer } from 'react-toastify';
 import { useIncome } from '../../Context/IncomeContext';
 
@@ -75,10 +75,19 @@ const Packages = () => {
         error,
         getMonthlyROIHistory,
         clearError,
+        getPoolData,
+        pooldata,
+        totalinvestment,
+        totalincome,
+        pooltreedata,
+        getPoolTreeData,
     } = useIncome();
+
+    const { loadUserProfile } = useUser();
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [selectedPackage, setSelectedPackage] = useState(null);
     const [investmentAmount, setInvestmentAmount] = useState('');
+    const [joinLoading, setJoinLoading] = useState(false)
     // const toast = useToast();
 
     const cardBg = useColorModeValue('white', 'gray.800');
@@ -86,9 +95,10 @@ const Packages = () => {
     const textColor = useColorModeValue('gray.600', 'gray.400');
     const { handleJoinPackage } = useAccount();
     useEffect(() => {
-        getMonthlyROIHistory(); // Fetch data when the component mounts
+        getMonthlyROIHistory();
+        getPoolData();// Fetch data when the component mounts
     }, [])
-    console.log(monthlyROIHistory.filter(item => item.stake_amount == 10)?.[0]?.status);
+    console.log("history", pooldata);
 
     // Available packages
     const availablePackages = [
@@ -98,7 +108,7 @@ const Packages = () => {
             icon: AiOutlineRocket,
             imgsrc: '/assets/images/pool1.png',
             color: 'blue',
-            btnType: monthlyROIHistory.filter(item => item.stake_amount == 10)?.[0]?.status === 'success' ? 'Allready Joined' : 'Join Now',
+            btnType: monthlyROIHistory.filter(item => item.stake_amount == 10)?.[0]?.status === 'success' ? 'Already Joined' : 'Join Now',
             minInvestment: 10,
             // maxInvestment: 49,
             dailyReturn: 3,
@@ -121,7 +131,7 @@ const Packages = () => {
             imgsrc: '/assets/images/pool2.png',
 
             color: 'yellow',
-            btnType: monthlyROIHistory.filter(item => item.stake_amount == 50)?.[0]?.status === 'success' ? 'Allready Joined' : 'Join Now',
+            btnType: monthlyROIHistory.filter(item => item.stake_amount == 50)?.[0]?.status === 'success' ? 'Already Joined' : 'Join Now',
 
             minInvestment: 50,
             // maxInvestment: 99,
@@ -146,7 +156,7 @@ const Packages = () => {
             imgsrc: '/assets/images/pool3.png',
             color: 'cyan',
             minInvestment: 100,
-            btnType: monthlyROIHistory.filter(item => item.stake_amount == 100)?.[0]?.status === 'success' ? 'Allready Joined' : 'Join Now',
+            btnType: monthlyROIHistory.filter(item => item.stake_amount == 100)?.[0]?.status === 'success' ? 'Already Joined' : 'Join Now',
 
             // maxInvestment: 1499,
             dailyReturn: 5,
@@ -172,7 +182,7 @@ const Packages = () => {
             imgsrc: '/assets/images/pool4.png',
             color: 'purple',
             minInvestment: 1500,
-            btnType: monthlyROIHistory.filter(item => item.stake_amount == 1500)?.[0]?.status === 'success' ? 'Allready Joined' : 'Join Now',
+            btnType: monthlyROIHistory.filter(item => item.stake_amount == 1500)?.[0]?.status === 'success' ? 'Already Joined' : 'Join Now',
 
             // maxInvestment: 19999,
             dailyReturn: 10,
@@ -193,44 +203,24 @@ const Packages = () => {
 
     ];
 
-    // Active investments
-    const activeInvestments = [
-        {
-            id: 1,
-            packageName: 'Gold Package',
-            investment: 1000,
-            dailyReturn: 2.5,
-            totalEarned: 125.50,
-            daysLeft: 28,
-            progress: 65,
-            status: 'Active',
-            startDate: '2024-01-01',
-            endDate: '2024-02-15',
-        },
-        {
-            id: 2,
-            packageName: 'Silver Package',
-            investment: 500,
-            dailyReturn: 1.8,
-            totalEarned: 45.20,
-            daysLeft: 15,
-            progress: 80,
-            status: 'Active',
-            startDate: '2023-12-15',
-            endDate: '2024-01-30',
-        },
-    ];
 
-    const handleInvest = (pkg) => {
-        setSelectedPackage(pkg);
-        onOpen();
-    };
+    const handleViewTree = async (data) => {
+        console.log(data);
+        const dto = {
+            pool: data?.name,
+            pool_id: data?.details?.id,
+        }
+        const response = await getPoolTreeData(dto);
+        console.log(response);
+    }
+
     const handleClickJoinNow = async (amount) => {
         // console.log("clicked")
         // if (monthlyROIHistory?.[0]?.status !== 'success') {
         //     toast.warning(`Please join ${pkg.name} package first`);
         //     return;
         // }
+        setJoinLoading(true);
         const dto = {
             amount: amount,
         }
@@ -238,10 +228,14 @@ const Packages = () => {
         console.log("join", result);
         if (result.status) {
             toast.success(result?.message)
+            await getMonthlyROIHistory();
+            await loadUserProfile()
+            setJoinLoading(false);
 
         }
         else {
             toast.error(result?.message)
+            setJoinLoading(false);
         }
     }
 
@@ -295,7 +289,7 @@ const Packages = () => {
                 <Tabs variant="enclosed" colorScheme="blue">
                     <TabList>
                         <Tab>Available Packages</Tab>
-                        <Tab>My Investments</Tab>
+                        <Tab>Pool History</Tab>
                         <Tab>Investment History</Tab>
                     </TabList>
 
@@ -360,7 +354,7 @@ const Packages = () => {
                                             <CardBody pt={0}>
                                                 <VStack spacing={4} align="stretch">
                                                     {/* Key Stats */}
-                                                    <Grid templateColumns="repeat(3, 1fr)" gap={4}>
+                                                    <Grid templateColumns={{ sm: 'repeat(2, 1fr)', md: 'repeat(1, 1fr)', lg: 'repeat(2, 1fr)' }} gap={4}>
                                                         <Box textAlign="center" p={3} bg={useColorModeValue('gray.50', 'gray.700')} borderRadius="lg">
                                                             <Box fontSize="2xl" fontWeight="bold" color={`${pkg.color}.500`}>
                                                                 {pkg.dailyReturn}%
@@ -386,16 +380,6 @@ const Packages = () => {
                                                                         </Box>
                                                                     ))
                                                                 }
-
-                                                                {/* <Box fontSize="2xl" fontWeight="bold" color="green.500">
-                                                                {pkg.totalReturn}%
-                                                            </Box>
-                                                            <Box fontSize="2xl" fontWeight="bold" color="green.500">
-                                                                {pkg.totalReturn}%
-                                                            </Box>
-                                                            <Box fontSize="2xl" fontWeight="bold" color="green.500">
-                                                                {pkg.totalReturn}%
-                                                            </Box> */}
                                                             </Flex>
                                                             <Text fontSize="sm" color={textColor} fontWeight={600}>
                                                                 3 Level Referral Income
@@ -404,26 +388,28 @@ const Packages = () => {
                                                     </Grid>
 
                                                     {/* Investment Range */}
-                                                    <Box>
+                                                    <Flex justifyContent={'space-between'} direction={'column'}>
                                                         <HStack justify="space-between" mb={2}>
                                                             <Text fontSize="sm" fontWeight="medium">
                                                                 Package Amount
                                                             </Text>
-                                                            <VStack>
-                                                                <Text fontSize="sm" fontWeight="medium">Join Date</Text>
-                                                                <HStack>
 
-                                                                    <Icon as={FiClock} boxSize={4} color={textColor} />
-                                                                    <Box fontSize="sm" color={textColor}>
-                                                                        {pkg.duration}
-                                                                    </Box>
-                                                                </HStack>
-                                                            </VStack>
+                                                            <Text fontSize="lg" fontWeight="bold">
+                                                                ${pkg.minInvestment.toLocaleString()}
+                                                            </Text>
                                                         </HStack>
-                                                        <Text fontSize="lg" fontWeight="bold">
-                                                            ${pkg.minInvestment.toLocaleString()}
-                                                        </Text>
-                                                    </Box>
+                                                        <HStack justifyContent={'space-between'}>
+                                                            <Box color={textColor} alignSelf={'end'} fontSize="sm" fontWeight="medium">Join Date</Box>
+                                                            <HStack>
+
+                                                                <Icon as={FiClock} boxSize={4} color={textColor} />
+                                                                <Box color={textColor} fontSize="md" fontWeight="bold">
+                                                                    {pkg.duration}
+                                                                </Box>
+                                                            </HStack>
+                                                        </HStack>
+                                                    </Flex>
+
 
                                                     <Divider />
 
@@ -443,10 +429,12 @@ const Packages = () => {
                                                 </Box> */}
 
                                                     <Button
+                                                        isLoading={isLoading}
                                                         colorScheme={pkg.color}
                                                         size="lg"
                                                         onClick={() => handleClickJoinNow(pkg.minInvestment)}
-                                                    // leftIcon={<FiDollarSign />}
+                                                        // leftIcon={<FiDollarSign />}
+                                                        isDisabled={pkg.btnType === "Already Joined"}
                                                     >
                                                         {pkg?.btnType}
                                                     </Button>
@@ -458,83 +446,315 @@ const Packages = () => {
                             </Grid>
                         </TabPanel>
 
-                        {/* My Investments Tab */}
+                        {/* Pool History Tab */}
                         <TabPanel p={0} pt={6}>
-                            <Grid templateColumns={{ base: '1fr', lg: 'repeat(2, 1fr)' }} gap={6} mb={6}>
-                                <Card bg={cardBg} border="1px" borderColor={borderColor}>
+                            {/* Summary Cards */}
+                            <Grid templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }} gap={{ base: 4, md: 6 }} mb={8}>
+                                <Card
+                                    bg={cardBg}
+                                    border="2px"
+                                    borderColor="blue.200"
+                                    _hover={{
+                                        transform: 'translateY(-2px)',
+                                        shadow: 'lg',
+                                    }}
+                                    transition="all 0.3s"
+                                >
                                     <CardBody>
-                                        <Stat>
-                                            <StatLabel>Total Invested</StatLabel>
-                                            <StatNumber color="blue.500">$1,500</StatNumber>
-                                            <StatHelpText>Across 2 packages</StatHelpText>
-                                        </Stat>
+                                        <HStack spacing={4}>
+                                            <Box
+                                                p={3}
+                                                borderRadius="full"
+                                                bg="blue.100"
+                                                color="blue.600"
+                                            >
+                                                <Icon as={FiDollarSign} boxSize={6} />
+                                            </Box>
+                                            <Stat>
+                                                <StatLabel fontSize="sm" color={textColor}>Total Invested</StatLabel>
+                                                <StatNumber color="blue.500" fontSize={{ base: "lg", md: "xl" }}>${totalinvestment}</StatNumber>
+                                                <StatHelpText>Active Pools</StatHelpText>
+                                            </Stat>
+                                        </HStack>
                                     </CardBody>
                                 </Card>
-                                <Card bg={cardBg} border="1px" borderColor={borderColor}>
+
+                                <Card
+                                    bg={cardBg}
+                                    border="2px"
+                                    borderColor="green.200"
+                                    _hover={{
+                                        transform: 'translateY(-2px)',
+                                        shadow: 'lg',
+                                    }}
+                                    transition="all 0.3s"
+                                >
                                     <CardBody>
-                                        <Stat>
-                                            <StatLabel>Total Earned</StatLabel>
-                                            <StatNumber color="green.500">$170.70</StatNumber>
-                                            <StatHelpText>11.38% return</StatHelpText>
-                                        </Stat>
+                                        <HStack spacing={4}>
+                                            <Box
+                                                p={3}
+                                                borderRadius="full"
+                                                bg="green.100"
+                                                color="green.600"
+                                            >
+                                                <Icon as={FiTrendingUp} boxSize={6} />
+                                            </Box>
+                                            <Stat>
+                                                <StatLabel fontSize="sm" color={textColor}>Total Earned</StatLabel>
+                                                <StatNumber color="green.500" fontSize={{ base: "lg", md: "xl" }}>${totalincome}</StatNumber>
+                                                <StatHelpText>All Time</StatHelpText>
+                                            </Stat>
+                                        </HStack>
+                                    </CardBody>
+                                </Card>
+
+                                <Card
+                                    bg={cardBg}
+                                    border="2px"
+                                    borderColor="purple.200"
+                                    _hover={{
+                                        transform: 'translateY(-2px)',
+                                        shadow: 'lg',
+                                    }}
+                                    transition="all 0.3s"
+                                >
+                                    <CardBody>
+                                        <HStack spacing={4}>
+                                            <Box
+                                                p={3}
+                                                borderRadius="full"
+                                                bg="purple.100"
+                                                color="purple.600"
+                                            >
+                                                <Icon as={FiTarget} boxSize={6} />
+                                            </Box>
+                                            <Stat>
+                                                <StatLabel fontSize="sm" color={textColor}>Active Pools</StatLabel>
+                                                <StatNumber color="purple.500" fontSize={{ base: "lg", md: "xl" }}>{pooldata.filter(p => p.detail !== null).length}</StatNumber>
+                                                <StatHelpText>Running</StatHelpText>
+                                            </Stat>
+                                        </HStack>
                                     </CardBody>
                                 </Card>
                             </Grid>
 
-                            <Grid templateColumns={{ base: '1fr', lg: 'repeat(2, 1fr)' }} gap={6}>
-                                {activeInvestments.map((investment) => (
-                                    <Card key={investment.id} bg={cardBg} border="1px" borderColor={borderColor}>
-                                        <CardHeader>
-                                            <HStack justify="space-between">
-                                                <Heading size="sm">{investment.packageName}</Heading>
-                                                <Badge colorScheme="green" variant="subtle">
-                                                    {investment.status}
-                                                </Badge>
-                                            </HStack>
-                                        </CardHeader>
-                                        <CardBody pt={0}>
-                                            <VStack spacing={4} align="stretch">
-                                                <Grid templateColumns="repeat(2, 1fr)" gap={4}>
-                                                    <Box>
-                                                        <Text fontSize="sm" color={textColor}>Investment</Text>
-                                                        <Text fontWeight="bold">${investment.investment}</Text>
-                                                    </Box>
-                                                    <Box>
-                                                        <Text fontSize="sm" color={textColor}>Daily Return</Text>
-                                                        <Text fontWeight="bold" color="green.500">{investment.dailyReturn}%</Text>
-                                                    </Box>
-                                                    <Box>
-                                                        <Text fontSize="sm" color={textColor}>Total Earned</Text>
-                                                        <Text fontWeight="bold" color="green.500">${investment.totalEarned}</Text>
-                                                    </Box>
-                                                    <Box>
-                                                        <Text fontSize="sm" color={textColor}>Days Left</Text>
-                                                        <Text fontWeight="bold">{investment.daysLeft}</Text>
-                                                    </Box>
-                                                </Grid>
+                            {/* Pool Cards */}
+                            <Box>
+                                <Heading size="md" mb={6} color={textColor}>
+                                    <HStack spacing={2}>
+                                        <Icon as={FiShield} color="blue.500" />
+                                        <Text>Your Pool History</Text>
+                                    </HStack>
+                                </Heading>
 
-                                                <Box>
-                                                    <HStack justify="space-between" mb={2}>
-                                                        <Text fontSize="sm" color={textColor}>Progress</Text>
-                                                        <Text fontSize="sm" color={textColor}>{investment.progress}%</Text>
-                                                    </HStack>
-                                                    <Progress
-                                                        value={investment.progress}
-                                                        colorScheme="blue"
-                                                        size="md"
-                                                        borderRadius="full"
-                                                    />
-                                                </Box>
+                                <Grid templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)', xl: 'repeat(3, 1fr)' }} gap={{ base: 4, md: 6 }}>
+                                    {pooldata.map((investment, index) => {
+                                        // Function to get package color based on name
+                                        const getPackageColor = (name) => {
+                                            const packageName = name?.toLowerCase() || '';
+                                            if (packageName.includes('basic') || packageName.includes('starter')) return 'blue';
+                                            if (packageName.includes('silver')) return 'gray';
+                                            if (packageName.includes('gold')) return 'yellow';
+                                            if (packageName.includes('platinum')) return 'purple';
+                                            if (packageName.includes('diamond')) return 'cyan';
+                                            if (packageName.includes('premium')) return 'teal';
+                                            return 'blue'; // default
+                                        };
 
-                                                <HStack justify="space-between" fontSize="sm" color={textColor}>
-                                                    <Text>Start: {investment.startDate}</Text>
-                                                    <Text>End: {investment.endDate}</Text>
-                                                </HStack>
-                                            </VStack>
-                                        </CardBody>
-                                    </Card>
-                                ))}
-                            </Grid>
+                                        // Function to get pool image based on index or ID
+                                        const getPoolImage = (index, id) => {
+                                            const poolImages = [
+                                                '/assets/images/pool1.png',
+                                                '/assets/images/pool2.png',
+                                                '/assets/images/pool3.png',
+                                                '/assets/images/pool4.png'
+                                            ];
+                                            return poolImages[index % poolImages.length];
+                                        };
+
+                                        const packageColor = getPackageColor(investment?.name);
+                                        const poolImage = getPoolImage(index, investment?.details?.id);
+
+                                        return (
+                                            investment.details !== null && (
+                                                <Card
+                                                    key={investment?.details?.id}
+                                                    bg={cardBg}
+                                                    border="2px"
+                                                    borderColor={`${packageColor}.200`}
+                                                    _hover={{
+                                                        transform: 'translateY(-4px)',
+                                                        shadow: 'xl',
+                                                        borderColor: `${packageColor}.400`,
+                                                    }}
+                                                    transition="all 0.3s"
+                                                    overflow="hidden"
+                                                >
+                                                    {/* Header with package-specific color */}
+                                                    <Box
+                                                        bg={`${packageColor}.500`}
+                                                        p={4}
+                                                        color="white"
+                                                        position="relative"
+                                                    >
+                                                        <HStack justify="space-between" mb={2}>
+                                                            <HStack spacing={3}>
+                                                                <Box
+                                                                    borderRadius="full"
+                                                                    overflow="hidden"
+                                                                    bg="white"
+                                                                    p={1}
+                                                                    border="2px"
+                                                                    borderColor="white"
+                                                                >
+                                                                    <Image
+                                                                        src={poolImage}
+                                                                        alt={`Pool ${index + 1}`}
+                                                                        boxSize={8}
+                                                                        objectFit="cover"
+                                                                        borderRadius="full"
+                                                                    />
+                                                                </Box>
+                                                                <Heading size="sm">{investment?.name || 'Pool'}</Heading>
+                                                            </HStack>
+                                                            <Badge colorScheme="green" variant="solid" fontSize="xs">
+                                                                {investment?.details?.status}
+                                                            </Badge>
+                                                        </HStack>
+                                                        <Text fontSize="xs" opacity={0.9}>
+                                                            Pool ID: #{investment?.details?.id}
+                                                        </Text>
+                                                    </Box>
+
+                                                    <CardBody>
+                                                        <VStack spacing={4} align="stretch">
+                                                            {/* Team Statistics */}
+                                                            <Box>
+                                                                <HStack justify="space-between" mb={3}>
+                                                                    <Text fontSize="sm" fontWeight="bold" color={textColor}>
+                                                                        Team Overview
+                                                                    </Text>
+                                                                    <Badge colorScheme="blue" variant="subtle">
+                                                                        {investment?.details?.team_count} Total
+                                                                    </Badge>
+                                                                </HStack>
+
+                                                                <Grid templateColumns="repeat(2, 1fr)" gap={3}>
+                                                                    <Box
+                                                                        p={3}
+                                                                        bg={useColorModeValue('gray.50', 'gray.700')}
+                                                                        borderRadius="lg"
+                                                                        textAlign="center"
+                                                                    >
+                                                                        <HStack justify="center" spacing={2}>
+                                                                            <Icon as={FiTrendingUp} color="green.500" boxSize={4} />
+                                                                            <Text fontSize="xs" color={textColor}>Left</Text>
+                                                                        </HStack>
+                                                                        <Text fontSize="lg" fontWeight="bold" color="green.500">
+                                                                            {investment?.details?.left_count}
+                                                                        </Text>
+                                                                    </Box>
+
+                                                                    <Box
+                                                                        p={3}
+                                                                        bg={useColorModeValue('gray.50', 'gray.700')}
+                                                                        borderRadius="lg"
+                                                                        textAlign="center"
+                                                                    >
+                                                                        <HStack justify="center" spacing={2}>
+                                                                            <Icon as={FiTrendingUp} color="blue.500" boxSize={4} />
+                                                                            <Text fontSize="xs" color={textColor}>Right</Text>
+                                                                        </HStack>
+                                                                        <Text fontSize="lg" fontWeight="bold" color="blue.500">
+                                                                            {investment?.details?.right_count}
+                                                                        </Text>
+                                                                    </Box>
+                                                                </Grid>
+                                                            </Box>
+
+                                                            <Divider />
+
+                                                            {/* Income Section */}
+                                                            <Box>
+                                                                <HStack justify="space-between" align="center">
+                                                                    <VStack align="start" spacing={1}>
+                                                                        <Text fontSize="sm" color={textColor}>Total Income</Text>
+                                                                        <Text fontSize="xl" fontWeight="bold" color="green.500">
+                                                                            ${investment?.details?.income}
+                                                                        </Text>
+                                                                    </VStack>
+                                                                    <Box
+                                                                        p={3}
+                                                                        borderRadius="full"
+                                                                        bg="green.100"
+                                                                        color="green.600"
+                                                                    >
+                                                                        <Icon as={FiDollarSign} boxSize={6} />
+                                                                    </Box>
+                                                                </HStack>
+                                                            </Box>
+
+                                                            {/* Progress Bar */}
+                                                            <Box>
+                                                                <HStack justify="space-between" mb={2}>
+                                                                    <Text fontSize="sm" color={textColor}>Pool Progress</Text>
+                                                                    <Text fontSize="sm" color={textColor}>
+                                                                        {Math.round((investment?.details?.team_count / 100) * 100)}%
+                                                                    </Text>
+                                                                </HStack>
+                                                                <Progress
+                                                                    value={Math.round((investment?.details?.team_count / 100) * 100)}
+                                                                    colorScheme="blue"
+                                                                    size="md"
+                                                                    borderRadius="full"
+                                                                    bg={useColorModeValue('gray.200', 'gray.600')}
+                                                                />
+                                                            </Box>
+
+                                                            {/* Action Button */}
+                                                            <Button
+                                                                size="sm"
+                                                                colorScheme="blue"
+                                                                variant="outline"
+                                                                leftIcon={<Icon as={FiCalendar} />}
+                                                                onClick={() => handleViewTree(investment)}
+                                                                w="full"
+                                                            >
+                                                                View Tree
+                                                            </Button>
+                                                        </VStack>
+                                                    </CardBody>
+                                                </Card>
+                                            )
+                                        )
+                                    })}
+
+                                    {/* Empty State */}
+                                    {pooldata.filter(p => p.detail !== null).length === 0 && (
+                                        <Box
+                                            gridColumn="1 / -1"
+                                            textAlign="center"
+                                            py={12}
+                                            px={6}
+                                        >
+                                            <Icon as={FiShield} boxSize={16} color="gray.400" mb={4} />
+                                            <Heading size="md" color="gray.500" mb={2}>
+                                                No Pool History Found
+                                            </Heading>
+                                            <Text color="gray.400" mb={6}>
+                                                You haven't joined any pools yet. Start by joining a package to see your pool history here.
+                                            </Text>
+                                            <Button
+                                                colorScheme="blue"
+                                                size="lg"
+                                                leftIcon={<Icon as={FiTarget} />}
+                                            >
+                                                Explore Packages
+                                            </Button>
+                                        </Box>
+                                    )}
+                                </Grid>
+                            </Box>
                         </TabPanel>
 
                         {/* Investment History Tab */}

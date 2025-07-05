@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import Tickermarque from './Tickermarque';
 
 const Home = () => {
 
@@ -179,89 +180,8 @@ const Home = () => {
                 </section>
                 {/* End Main Slider Section */}
                 {/* Rates One */}
-                <section className="rates-one style-two">
-                    <div className="auto-container">
-                        <div className="animation_mode">
-                            {/* Coin One */}
-                            <div className="coin-one">
-                                <div className="coin-one_inner">
-                                    <div className="coin-one_name">
-                                        Ripple <span>-0.03</span>
-                                    </div>
-                                    <div className="coin-one_info">
-                                        $0.6285 <span>-5.11%</span> $62846327808.735
-                                    </div>
-                                </div>
-                            </div>
-                            {/* Coin One */}
-                            <div className="coin-one">
-                                <div className="coin-one_inner">
-                                    <div className="coin-one_name">
-                                        Ethereum Classic <span>-1.06</span>
-                                    </div>
-                                    <div className="coin-one_info">
-                                        $18.88 <span>-5.32%</span> $2719215894.5977
-                                    </div>
-                                </div>
-                            </div>
-                            {/* Coin One */}
-                            <div className="coin-one">
-                                <div className="coin-one_inner">
-                                    <div className="coin-one_name">
-                                        Litecoin <span>-0.84</span>
-                                    </div>
-                                    <div className="coin-one_info">
-                                        $71.22 <span>-1.16%</span> $5261153554.8576
-                                    </div>
-                                </div>
-                            </div>
-                            {/* Coin One */}
-                            <div className="coin-one">
-                                <div className="coin-one_inner">
-                                    <div className="coin-one_name">
-                                        Ethereum <span>-78.12</span>
-                                    </div>
-                                    <div className="coin-one_info">
-                                        $1,977.50 <span>-3.80%</span> $237806063605.17
-                                    </div>
-                                </div>
-                            </div>
-                            {/* Coin One */}
-                            <div className="coin-one">
-                                <div className="coin-one_inner">
-                                    <div className="coin-one_name">
-                                        Bitcoin <span>-1,021.00</span>
-                                    </div>
-                                    <div className="coin-one_info">
-                                        $35,493.2 <span>-2.80%</span> $693629785031.29
-                                    </div>
-                                </div>
-                            </div>
-                            {/* Coin One */}
-                            <div className="coin-one">
-                                <div className="coin-one_inner">
-                                    <div className="coin-one_name">
-                                        DigitalCash <span>-1.02</span>
-                                    </div>
-                                    <div className="coin-one_info">
-                                        $31.14 <span>-3.17%</span> $359278952.22048
-                                    </div>
-                                </div>
-                            </div>
-                            {/* Coin One */}
-                            <div className="coin-one">
-                                <div className="coin-one_inner">
-                                    <div className="coin-one_name">
-                                        Cardano <span>0.00</span>
-                                    </div>
-                                    <div className="coin-one_info">
-                                        $0.3566 <span>-0.85%</span> $16046576751.859
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+               
+                <Tickermarque />
                 {/* End Rates One */}
                 {/* Trading Two */}
                 <section className="trading-two">
